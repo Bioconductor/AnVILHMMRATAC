@@ -1,0 +1,7 @@
+﻿participant_id,fastq_1,fastq_2
+SRR891269,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891269_1.fastq.gz,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891269_2.fastq.gz
+SRR891270,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891270_1.fastq.gz,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891270_2.fastq.gz
+SRR891271,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891271_1.fastq.gz,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891271_2.fastq.gz
+SRR891272,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891272_1.fastq.gz,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891272_2.fastq.gz
+SRR891273,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891273_1.fastq.gz,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891273_2.fastq.gz
+SRR891274,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891274_1.fastq.gz,gs://fc-2069b81e-1518-4051-bda8-9f69cedca830/data/SRR891274_2.fastq.gz
