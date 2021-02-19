@@ -2,50 +2,63 @@
 # output will be ATACseq.bam
 
 task hmmratac_index {
-
+    File bam_file
+    String index_name
 
     command {
-        samtools sort ATACseq.bam -o ATACseq.sorted.bam
+        samtools sort ${bam_file} -o ATACseq.sorted.bam
         samtools index ATACseq.sorted.bam ATACseq.sorted.bam.bai
-        samtools view -H ATACseq.sorted.bam| perl -ne 'if(/^@SQ.*?SN:(\w+)\s+LN:(\d+)/){print $1,"\t",$2,"\n"}' > genome.info
+        samtools view -H ATACseq.sorted.bam| perl -ne 'if(/^@SQ.*?SN:(\w+)\s+LN:(\d+)/){print $1,"\t",$2,"\n"}' > ${index_name}.info
     }
 
     runtime {
-        docker:
+        docker: ""
     }
 
     output {
-        File
+        File bam_index = "${index_name}.info"
+        File sorted_bam = "ATACseq.sorted.bam"
+        File sorted_bam_index = "ATACseq.sorted.bam.bai"
     }
 }
 
 task hmmratac_run {
+    File sorted_bam
+    File sorted_bam_index
+    File bam_index
+    String filter
 
     command {
-    java -jar HMMRATAC_V1.2.4_exe.jar -b ATACseq.sorted.bam -i ATACseq.sorted.bam.bai -g genome.info
-    awk -v OFS="\t" '$13>=10 {print}' NAME_peaks.gappedPeak > NAME.filteredPeaks.gappedPeak
+    java -jar HMMRATAC_V1.2.4_exe.jar -b ${sorted_bam} -i ${sorted_bam_index} -g ${bam_index}
+    awk -v OFS="\t" '$13>=${filter} {print}' NAME_peaks.gappedPeak > NAME.filteredPeaks.gappedPeak
     }
 
     runtime {
-        docker:
+        docker: ""
     }
 
     output {
-        File
+        File hmmratac_output = NAME.filteredPead.gappedPeak
     }
 }
 
 workflow hmmratac {
-    
+    File bam_file
+    String index_name
+    String filter
 
     call hmmratac_index {
         input:
-        
+        bam_file = bam_file,
+        index_name = index_name
     }
 
     call hmmratac_run {
         input:
-        
+        sorted_bam = hmmratac_index.sorted_bam,
+        sorted_bam_index = hmmratac_index.sorted_bam_index,
+        bam_index = hmmratac_index.bam_index,
+        filter = filter
     }
 
     meta {
