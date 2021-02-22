@@ -1,5 +1,21 @@
-# need a task for BAM file aligner
-# output will be ATACseq.bam
+task bam_align {
+    File ref
+    File fastq1
+    File fastq2
+
+    command {
+        bwa index ${ref}
+        bwa mem ${ref} ${fastq1} ${fastq2}
+    }
+
+    runtime {
+        docker: "mtmorgan/hmmratac:latest"
+    }
+
+    output {
+        File ATACseq = "ATACseq.bam"
+    }
+}
 
 task hmmratac_index {
     File bam_file
@@ -12,7 +28,7 @@ task hmmratac_index {
     }
 
     runtime {
-        docker: ""
+        docker: "mtmorgan/hmmratac:latest"
     }
 
     output {
@@ -34,7 +50,7 @@ task hmmratac_run {
     }
 
     runtime {
-        docker: ""
+        docker: "mtmorgan/hmmratac:latest"
     }
 
     output {
@@ -43,13 +59,22 @@ task hmmratac_run {
 }
 
 workflow hmmratac {
-    File bam_file
+    File ref
+    File fastq1
+    File fastq2
     String index_name
     String filter
 
+    call bam_align {
+        input:
+        ref = ref,
+        fastq1 = fastq1,
+        fastq2 = fastq2
+    }
+
     call hmmratac_index {
         input:
-        bam_file = bam_file,
+        bam_file = bam_align.ATACseq,
         index_name = index_name
     }
 
