@@ -6,7 +6,8 @@ RUN apk add --no-cache \
         bzip2-dev \
         xz-dev \
         curl-dev \
-        openjdk7-jre
+        openjdk7-jre \
+        bash
 
 ## samtools
 ## ADD rather than RUN curl because macOS is currently broken wrt github.com
