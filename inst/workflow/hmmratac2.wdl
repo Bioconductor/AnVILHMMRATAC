@@ -9,11 +9,17 @@ task hmmratac_run {
     File fastq2
 
     command {
-        bwa mem ${bwa_ref} ${fastq1} ${fastq2}
+        bwa mem ${bwa_ref} ${fastq1} ${fastq2} |
+            samtools view -b -  |
+            samtools fixmate -m - bam_file
     }
 
     runtime {
         docker: "mtmorgan/hmmratac:latest"
+    }
+
+    output {
+        File bam_file = "bam_file"
     }
 }
 
