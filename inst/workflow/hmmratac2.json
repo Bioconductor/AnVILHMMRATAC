@@ -1,10 +1,10 @@
 {
-    "hmmratac.bwa_ref": "genome/GCF_000001405.39_GRCh38.p13_genomic.fna.gz",
-    "hmmratac.bwa_ref_amb": "genome/GCF_000001405.39_GRCh38.p13_genomic.fna.gz.amb",
-    "hmmratac.bwa_ref_ann": "genome/GCF_000001405.39_GRCh38.p13_genomic.fna.gz.ann",
-    "hmmratac.bwa_ref_bwt": "genome/GCF_000001405.39_GRCh38.p13_genomic.fna.gz.bwt",
-    "hmmratac.bwa_ref_pac": "genome/GCF_000001405.39_GRCh38.p13_genomic.fna.gz.pac",
-    "hmmratac.bwa_ref_sa": "genome/GCF_000001405.39_GRCh38.p13_genomic.fna.gz.sa",
-    "hmmratac.fastq1": "fastqs/SRR891274_1.fastq.gz",
-    "hmmratac.fastq2": "fastqs/SRR891274_2.fastq.gz"
+    "hmmratac.bwa_ref": "GCF_000001405.39_GRCh38.p13_genomic.fna.gz",
+    "hmmratac.bwa_ref_amb": "GCF_000001405.39_GRCh38.p13_genomic.fna.gz.amb",
+    "hmmratac.bwa_ref_ann": "GCF_000001405.39_GRCh38.p13_genomic.fna.gz.ann",
+    "hmmratac.bwa_ref_bwt": "GCF_000001405.39_GRCh38.p13_genomic.fna.gz.bwt",
+    "hmmratac.bwa_ref_pac": "GCF_000001405.39_GRCh38.p13_genomic.fna.gz.pac",
+    "hmmratac.bwa_ref_sa": "GCF_000001405.39_GRCh38.p13_genomic.fna.gz.sa",
+    "hmmratac.fastq1": "SRR891274_1.fastq.gz",
+    "hmmratac.fastq2": "SRR891274_2.fastq.gz"
 }
