@@ -9,9 +9,8 @@ task hmmratac_run {
     File fastq2
 
     command {
-        bwa mem ${bwa_ref} ${fastq1} ${fastq2} |
-            samtools view -b -  |
-            samtools fixmate -m - bam_file
+        bwa mem ${bwa_ref} ${fastq1} ${fastq2} > align.sam
+        samtools view -bS -o bam_file.bam align.sam
     }
 
     runtime {
