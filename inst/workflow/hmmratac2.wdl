@@ -19,7 +19,7 @@ task hmmratac_run {
     }
 
     output {
-        File bam_file = "bam_file"
+        File bam_file = "bam_file.bam"
     }
 }
 
