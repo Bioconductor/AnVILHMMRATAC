@@ -12,7 +12,7 @@ task hmmratac_run {
     command {
         ## mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
         ## "SELECT chrom, size FROM hg19.chromInfo" > genome.info
-        bwa mem ${bwa_ref} ${fastq1} ${fastq2} |
+        bwa mem ${bwa_ref} ${fastq1} ${fastq2} | \
         samtools view -bS -t ${chromInfo} -o bam_file.bam -
     }
 
