@@ -1,5 +1,4 @@
 {
     "bam_file": "bam_file.bam",
-    "genome_info": "genome.info",
-    "filter": "10"
+    "genome_info": "genome.info"
 }
