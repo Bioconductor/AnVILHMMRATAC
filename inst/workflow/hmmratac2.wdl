@@ -12,12 +12,15 @@ task hmmratac_run {
     command {
         ## mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
         ## "SELECT chrom, size FROM hg19.chromInfo" > genome.info
-        bwa mem ${bwa_ref} ${fastq1} ${fastq2} | \
-        samtools view -bS -t ${chromInfo} -o bam_file.bam -
+        bwa mem -t 6 ${bwa_ref} ${fastq1} ${fastq2} | \
+        samtools view -bS -t ${chromInfo} -o bam_file.bam - 
     }
 
     runtime {
         docker: "mtmorgan/hmmratac:latest"
+        memory: "10G"
+        cpu: "6"
+        disks: "local-disk 100 SSD"
     }
 
     output {
