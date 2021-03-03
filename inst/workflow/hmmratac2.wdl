@@ -9,8 +9,8 @@ task hmmratac_run {
     File fastq2
 
     command {
-        mysql –-user=genome --host=genome-mysql.cse.ucsc.edu –A –e \
-        “select chrom, size from hg19.chromInfo” > genome.info
+        mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
+        "SELECT chrom, size FROM hg19.chromInfo" > genome.info
         bwa mem ${bwa_ref} ${fastq1} ${fastq2} |
         samtools view -bS -t genome.info -o bam_file.bam -
     }
