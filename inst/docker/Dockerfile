@@ -7,6 +7,7 @@ RUN apk add --no-cache \
         xz-dev \
         curl-dev \
         openjdk7-jre \
+        mariadb-client \
         bash
 
 ## samtools
