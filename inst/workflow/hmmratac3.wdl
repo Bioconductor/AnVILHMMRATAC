@@ -1,5 +1,8 @@
 task hmmratac_run {
     File bam_file
+    File fastq1
+
+    String out = basename(fastq1, "_1.fastq.gz")
 
     command <<<
         set -e -o pipefail
@@ -8,8 +11,9 @@ task hmmratac_run {
         samtools view -H ATACseq.sorted.bam | \
         awk -F'[\t:]' '$1 == "@SQ" {print $3"\t"$5}' > genome.info
         java -jar /HMMRATAC_V1.2.10_exe.jar --window 2500000 \
-        -b ATACseq.sorted.bam -i ATACseq.sorted.bam.bai -g genome.info
-        awk -v OFS="\t" '$13 >= 10 {print}' NAME_peaks.gappedPeak > NAME.filteredPeaks.gappedPeak
+        -b ATACseq.sorted.bam -i ATACseq.sorted.bam.bai -g genome.info \
+        -o ${out}
+        awk -v OFS="\t" '$13 >= 10 {print}' ${out}_peaks.gappedPeak > ${out}.filteredPeaks.gappedPeak
     >>>
 
     runtime {
@@ -26,10 +30,12 @@ task hmmratac_run {
 
 workflow hmmratac {
     File bam_file
+    File fastq1
 
     call hmmratac_run {
         input:
         bam_file = bam_file,
+        fastq1 = fastq1
     }
 
     meta {
