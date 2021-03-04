@@ -1,4 +1,4 @@
 {
     "bam_file": "bam_file.bam",
-    "genome_info": "genome.info"
+    "fastq1": "SRR891274_1.fastq.gz"
 }
