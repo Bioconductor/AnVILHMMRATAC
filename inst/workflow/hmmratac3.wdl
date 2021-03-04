@@ -2,14 +2,14 @@ task hmmratac_run {
     File bam_file
     File genome_info
 
-    command {
+    command <<<
         set -e -o pipefail
         samtools sort ${bam_file} -o ATACseq.sorted.bam
         samtools index ATACseq.sorted.bam ATACseq.sorted.bam.bai
         java -jar HMMRATAC_V1.2.4_exe.jar -b ATACseq.sorted.bam \
         -i ATACseq.sorted.bam.bai -g ${genome_info}
         awk -v OFS="\t" '$13 >= 10 {print}' NAME_peaks.gappedPeak > NAME.filteredPeaks.gappedPeak
-    }
+    >>>
 
     runtime {
         docker: "mtmorgan/hmmratac:latest"
