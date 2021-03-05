@@ -24,7 +24,7 @@ task hmmratac_run {
     }
 
      output {
-        File filtered_gappedPeak = "NAME.filteredPeaks.gappedPeak"
+        File filtered_gappedPeak = "${out}.filteredPeaks.gappedPeak"
     }
 }
 
