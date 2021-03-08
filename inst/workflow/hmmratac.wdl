@@ -65,8 +65,8 @@ task hmmratac_run {
 
 workflow hmmratac {
     File ref
-    Array [File] fastq1
-    Array [File] fastq2
+    Array[File] fastq1
+    Array[File] fastq2
 
     call bam_index {
         input:
@@ -83,8 +83,8 @@ workflow hmmratac {
             bwa_ref_pac = bam_index.bwa_ref_pac,
             bwa_ref_sa = bam_index.bwa_ref_sa,
             chromInfo = bam_index.genome_info,
-            fastq1 = fastq1.left,
-            fastq2 = fastq2.right
+            fastq1 = fastqs.left,
+            fastq2 = fastqs.right
         }
     }
 
