@@ -6,7 +6,7 @@ task bam_index {
     command {
         bwa index ${ref}
         mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
-        "SELECT chrom, size FROM hg19.chromInfo" > genome.info
+        "SELECT chrom, size FROM hg19.chromInfo" > genome_info
     }
 
     runtime {
@@ -17,12 +17,12 @@ task bam_index {
     }
 
     output {
-        File bwa_ref_amb = "${out_name}.amb",
-        File bwa_ref_ann = "${out_name}.ann",
-        File bwa_ref_bwt = "${out_name}.bwt",
-        File bwa_ref_pac = "${out_name}.pac",
-        File bwa_ref_sa = "${out_name}.sa",
-        File genome_info = "genome.info"
+        File bwa_ref_amb = "${out_name}.amb"
+        File bwa_ref_ann = "${out_name}.ann"
+        File bwa_ref_bwt = "${out_name}.bwt"
+        File bwa_ref_pac = "${out_name}.pac"
+        File bwa_ref_sa = "${out_name}.sa"
+        File genome_info = "genome_info"
     }
 }
 
@@ -32,7 +32,7 @@ task hmmratac_run {
     File bwa_ref_ann
     File bwa_ref_bwt
     File bwa_ref_pac
-    File bwa_ref_sac
+    File bwa_ref_sa
     File chromInfo
     File fastq1
     File fastq2
@@ -84,7 +84,7 @@ workflow hmmratac {
             bwa_ref_bwt = bam_index.bwa_ref_bwt,
             bwa_ref_pac = bam_index.bwa_ref_pac,
             bwa_ref_sa = bam_index.bwa_ref_sa,
-            chromInfo = bam_index.genome.info,
+            chromInfo = bam_index.genome_info,
             fastq1 = fastq1,
             fastq2 = fastq2
         }
