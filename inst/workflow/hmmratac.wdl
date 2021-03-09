@@ -81,7 +81,7 @@ workflow hmmratac {
         bwa_ref_bwt = bam_index.bwa_ref_bwt,
         bwa_ref_pac = bam_index.bwa_ref_pac,
         bwa_ref_sa = bam_index.bwa_ref_sa,
-        chromInfo = bam_index.genome_info,
+        #chromInfo = bam_index.genome_info,
         fastq1 = fastq1,
         fastq2 = fastq2
     }
