@@ -32,7 +32,7 @@ task hmmratac_run {
     File bwa_ref_bwt
     File bwa_ref_pac
     File bwa_ref_sa
-    File chromInfo
+    #File chromInfo
     File fastq1
     File fastq2
 
