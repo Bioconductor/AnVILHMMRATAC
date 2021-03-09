@@ -73,20 +73,18 @@ workflow hmmratac {
         ref = ref
     }
 
-    #scatter (fastqs in zip(fastq1, fastq2)) {
-        #call hmmratac_run {
-            #input:
-            #bwa_ref = ref,
-            #bwa_ref_amb = bam_index.bwa_ref_amb,
-            #bwa_ref_ann = bam_index.bwa_ref_ann,
-            #bwa_ref_bwt = bam_index.bwa_ref_bwt,
-            #bwa_ref_pac = bam_index.bwa_ref_pac,
-            #bwa_ref_sa = bam_index.bwa_ref_sa,
-            #chromInfo = bam_index.genome_info,
-            #fastq1 = fastqs.left,
-            #fastq2 = fastqs.right
-        #}
-    #}
+    call hmmratac_run {
+        input:
+        bwa_ref = ref,
+        bwa_ref_amb = bam_index.bwa_ref_amb,
+        bwa_ref_ann = bam_index.bwa_ref_ann,
+        bwa_ref_bwt = bam_index.bwa_ref_bwt,
+        bwa_ref_pac = bam_index.bwa_ref_pac,
+        bwa_ref_sa = bam_index.bwa_ref_sa,
+        chromInfo = bam_index.genome_info,
+        fastq1 = fastq1,
+        fastq2 = fastq2
+    }
 
     meta {
         author: "Kayla Interdonato"
