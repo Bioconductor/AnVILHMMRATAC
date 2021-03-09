@@ -5,8 +5,8 @@ task bam_index {
 
     command {
         bwa index ${ref}
-        mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
-        "SELECT chrom, size FROM hg19.chromInfo" > genome_info
+        #mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
+        #"SELECT chrom, size FROM hg19.chromInfo" > genome_info
     }
 
     runtime {
@@ -21,7 +21,7 @@ task bam_index {
         File bwa_ref_bwt = "${out_name}.bwt"
         File bwa_ref_pac = "${out_name}.pac"
         File bwa_ref_sa = "${out_name}.sa"
-        File genome_info = "genome_info"
+        #File genome_info = "genome_info"
     }
 }
 
