@@ -2,9 +2,15 @@ task bam_index {
     File ref
 
     command {
-        bwa index ${ref}
-        #mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
-        #"SELECT chrom, size FROM hg19.chromInfo" > genome_info
+        set -e -o pipefail
+        #bwa index ${ref}
+        touch "${ref}.amb"
+        touch "${ref}.ann"
+        touch "${ref}.bwt"
+        touch "${ref}.pac"
+        touch "${ref}.sa"
+        mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
+        "SELECT chrom, size FROM hg19.chromInfo" > genome_info
     }
 
     runtime {
@@ -19,7 +25,7 @@ task bam_index {
         File bwa_ref_bwt = "${ref}.bwt"
         File bwa_ref_pac = "${ref}.pac"
         File bwa_ref_sa = "${ref}.sa"
-        #File genome_info = "genome_info"
+        File genome_info = "genome_info"
     }
 }
 
@@ -65,7 +71,6 @@ workflow hmmratac {
     File ref
     Array[File] fastq1
     Array[File] fastq2
-    File chromInfo
 
     call bam_index {
         input:
@@ -80,7 +85,7 @@ workflow hmmratac {
         bwa_ref_bwt = bam_index.bwa_ref_bwt,
         bwa_ref_pac = bam_index.bwa_ref_pac,
         bwa_ref_sa = bam_index.bwa_ref_sa,
-        chromInfo = chromInfo,
+        chromInfo = bam_index.genome_info,
         fastq1 = fastq1,
         fastq2 = fastq2
     }
