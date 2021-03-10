@@ -1,10 +1,8 @@
 task bam_index {
     File ref
 
-    String out_name = basename(ref)
-
     command {
-        bwa index ${ref} ${out_name}
+        bwa index ${ref}
         #mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
         #"SELECT chrom, size FROM hg19.chromInfo" > genome_info
     }
@@ -16,11 +14,11 @@ task bam_index {
     }
 
     output {
-        File bwa_ref_amb = "${out_name}.amb"
-        File bwa_ref_ann = "${out_name}.ann"
-        File bwa_ref_bwt = "${out_name}.bwt"
-        File bwa_ref_pac = "${out_name}.pac"
-        File bwa_ref_sa = "${out_name}.sa"
+        File bwa_ref_amb = "${ref}.amb"
+        File bwa_ref_ann = "${ref}.ann"
+        File bwa_ref_bwt = "${ref}.bwt"
+        File bwa_ref_pac = "${ref}.pac"
+        File bwa_ref_sa = "${ref}.sa"
         #File genome_info = "genome_info"
     }
 }
