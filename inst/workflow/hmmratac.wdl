@@ -67,6 +67,7 @@ workflow hmmratac {
     File ref
     Array[File] fastq1
     Array[File] fastq2
+    File chromInfo
 
     call bam_index {
         input:
