@@ -4,7 +4,7 @@ task bam_index {
     String out_name = basename(ref)
 
     command {
-        bwa index ${ref} out_name
+        bwa index ${ref} ${out_name}
         #mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
         #"SELECT chrom, size FROM hg19.chromInfo" > genome_info
     }
