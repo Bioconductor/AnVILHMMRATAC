@@ -32,7 +32,7 @@ task hmmratac_run {
     File bwa_ref_bwt
     File bwa_ref_pac
     File bwa_ref_sa
-    #File chromInfo
+    File chromInfo
     File fastq1
     File fastq2
 
@@ -81,7 +81,7 @@ workflow hmmratac {
         bwa_ref_bwt = bam_index.bwa_ref_bwt,
         bwa_ref_pac = bam_index.bwa_ref_pac,
         bwa_ref_sa = bam_index.bwa_ref_sa,
-        #chromInfo = bam_index.genome_info,
+        chromInfo = chromInfo,
         fastq1 = fastq1,
         fastq2 = fastq2
     }
