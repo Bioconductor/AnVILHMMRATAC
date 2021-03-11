@@ -37,7 +37,12 @@ workflow hmmratac {
     Array[File] fastq1
     Array[File] fastq2
 
-    scatter (fastqs in zip(fastq1, fastq2)) {
+    Array[Pair[File,File]] fastq_pairs = zip(fastq1, fastq2)
+
+    scatter (fastq_pair in fastq_pairs) {
+        File fastq_1 = fastq_pair.left
+        File fastq_2 = fastq_pair.right
+
         call hmmratac_run {
             input:
             bwa_ref = bwa_ref,
@@ -47,8 +52,8 @@ workflow hmmratac {
             bwa_ref_pac = bwa_ref_pac,
             bwa_ref_sa = bwa_ref_sa,
             chromInfo = chromInfo,
-            fastq1 = fastqs.left,
-            fastq2 = fastqs.right
+            fastq1 = fastq_1,
+            fastq2 = fastq_2
         }
     }
 
