@@ -37,17 +37,19 @@ workflow hmmratac {
     Array[File] fastq1
     Array[File] fastq2
 
-    call hmmratac_run {
-        input:
-        bwa_ref = bwa_ref,
-        bwa_ref_amb = bwa_ref_amb,
-        bwa_ref_ann = bwa_ref_ann,
-        bwa_ref_bwt = bwa_ref_bwt,
-        bwa_ref_pac = bwa_ref_pac,
-        bwa_ref_sa = bwa_ref_sa,
-        chromInfo = chromInfo,
-        fastq1 = fastq1,
-        fastq2 = fastq2
+    scatter (fastqs in zip(fastq1, fastq2)) {
+        call hmmratac_run {
+            input:
+            bwa_ref = bwa_ref,
+            bwa_ref_amb = bwa_ref_amb,
+            bwa_ref_ann = bwa_ref_ann,
+            bwa_ref_bwt = bwa_ref_bwt,
+            bwa_ref_pac = bwa_ref_pac,
+            bwa_ref_sa = bwa_ref_sa,
+            chromInfo = chromInfo,
+            fastq1 = fastqs.left,
+            fastq2 = fastqs.right
+        }
     }
 
     meta {
