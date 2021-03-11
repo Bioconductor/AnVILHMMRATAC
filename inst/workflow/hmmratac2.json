@@ -5,6 +5,11 @@
     "hmmratac.bwa_ref_bwt": "GCF_000001405.39_GRCh38.p13_genomic.fna.gz.bwt",
     "hmmratac.bwa_ref_pac": "GCF_000001405.39_GRCh38.p13_genomic.fna.gz.pac",
     "hmmratac.bwa_ref_sa": "GCF_000001405.39_GRCh38.p13_genomic.fna.gz.sa",
-    "hmmratac.fastq1": "SRR891274_1.fastq.gz",
-    "hmmratac.fastq2": "SRR891274_2.fastq.gz"
+    "hmmratac.chromInfo": "genome_info",
+    "hmmratac.fastq1": [
+        "SRR891274_1.fastq.gz"
+    ],
+    "hmmratac.fastq2": [
+        "SRR891274_2.fastq.gz"
+    ]
 }

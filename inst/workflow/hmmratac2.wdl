@@ -10,8 +10,6 @@ task hmmratac_run {
     File fastq2
 
     command {
-        ## mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
-        ## "SELECT chrom, size FROM hg19.chromInfo" > genome.info
         bwa mem -t 6 ${bwa_ref} ${fastq1} ${fastq2} | \
         samtools view -bS -t ${chromInfo} -o bam_file.bam - 
     }
@@ -36,8 +34,8 @@ workflow hmmratac {
     File bwa_ref_pac
     File bwa_ref_sa
     File chromInfo
-    File fastq1
-    File fastq2
+    Array[File] fastq1
+    Array[File] fastq2
 
     call hmmratac_run {
         input:
