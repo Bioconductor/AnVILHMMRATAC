@@ -1,17 +1,12 @@
 task bam_index {
     File ref
 
-    command {
+    command <<<
         set -e -o pipefail
-        #bwa index ${ref}
-        touch "${ref}.amb"
-        touch "${ref}.ann"
-        touch "${ref}.bwt"
-        touch "${ref}.pac"
-        touch "${ref}.sa"
+        bwa index ${ref}
         mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \
         "SELECT chrom, size FROM hg19.chromInfo" > genome_info
-    }
+    >>>
 
     runtime {
         docker: "mtmorgan/hmmratac:latest"
@@ -72,22 +67,29 @@ workflow hmmratac {
     Array[File] fastq1
     Array[File] fastq2
 
+    Array[Pair[File,File]] fastq_pairs = zip(fastq1, fastq2)
+
     call bam_index {
         input:
         ref = ref
     }
 
-    call hmmratac_run {
-        input:
-        bwa_ref = ref,
-        bwa_ref_amb = bam_index.bwa_ref_amb,
-        bwa_ref_ann = bam_index.bwa_ref_ann,
-        bwa_ref_bwt = bam_index.bwa_ref_bwt,
-        bwa_ref_pac = bam_index.bwa_ref_pac,
-        bwa_ref_sa = bam_index.bwa_ref_sa,
-        chromInfo = bam_index.genome_info,
-        fastq1 = fastq1,
-        fastq2 = fastq2
+    scatter (fastq_pair in fastq_pairs) {
+        File fastq_1 = fastq_pair.left
+        File fastq_2 = fastq_pair.right
+
+        call hmmratac_run {
+            input:
+            bwa_ref = ref,
+            bwa_ref_amb = bam_index.bwa_ref_amb,
+            bwa_ref_ann = bam_index.bwa_ref_ann,
+            bwa_ref_bwt = bam_index.bwa_ref_bwt,
+            bwa_ref_pac = bam_index.bwa_ref_pac,
+            bwa_ref_sa = bam_index.bwa_ref_sa,
+            chromInfo = bam_index.genome_info,
+            fastq1 = fastq_1,
+            fastq2 = fastq_2
+        }
     }
 
     meta {
