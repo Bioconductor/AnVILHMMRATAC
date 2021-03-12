@@ -12,7 +12,6 @@ task bam_index {
         docker: "mtmorgan/hmmratac:latest"
         memory: "10G"
         cpu: "6"
-        disks: "local-disk 100 SSD"
     }
 
     output {
@@ -56,6 +55,7 @@ task hmmratac_run {
         docker: "mtmorgan/hmmratac:latest"
         memory: "10G"
         cpu: "6"
+        disks: "local-disk 100 SSD"
     }
 
     output {
