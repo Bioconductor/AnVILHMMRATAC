@@ -74,16 +74,16 @@ workflow hmmratac {
         ref = ref
     }
 
-    File bwa_ref_amb = bam_index.bwa_ref_amb
-    File bwa_ref_ann = bam_index.bwa_ref_ann
-    File bwa_ref_bwt = bam_index.bwa_ref_bwt
-    File bwa_ref_pac = bam_index.bwa_ref_pac
-    File bwa_ref_sa = bam_index.bwa_ref_sa
-    File genome_info = bam_index.genome_info
-
     scatter (fastq_pair in fastq_pairs) {
         File fastq_1 = fastq_pair.left
         File fastq_2 = fastq_pair.right
+
+        File bwa_ref_amb = bam_index.bwa_ref_amb
+        File bwa_ref_ann = bam_index.bwa_ref_ann
+        File bwa_ref_bwt = bam_index.bwa_ref_bwt
+        File bwa_ref_pac = bam_index.bwa_ref_pac
+        File bwa_ref_sa = bam_index.bwa_ref_sa
+        File genome_info = bam_index.genome_info
 
         call hmmratac_run {
             input:
