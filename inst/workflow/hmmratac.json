@@ -5,5 +5,6 @@
     ],
     "hmmratac.fastq2": [
         "SRR891274_2.fastq.gz"
-    ]
+    ],
+    "hmmratac.chromInfo": "genome_info"
 }
