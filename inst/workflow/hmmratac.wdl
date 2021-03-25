@@ -53,7 +53,7 @@ task hmmratac_run {
 
     runtime {
         docker: "mtmorgan/hmmratac:latest"
-        memory: "10G"
+        memory: "36G"
         cpu: "6"
         disks: "local-disk 100 SSD"
     }
