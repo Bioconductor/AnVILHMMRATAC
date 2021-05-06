@@ -1,0 +1,112 @@
+---
+title: "Downstream Analysis of AnVILHMMRATAC Data"
+author:
+- name: Kayla Interdonato
+  affiliation: Roswell Park Comprehensive Cancer Center, Buffalo, NY
+date: "`r Sys.Date()`"
+output:
+    BiocStyle::html_document:
+        toc: true
+        toc_flow: true
+vignette: >
+  %\VignetteIndexEntry{B_Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+This vignette will walk a user through how to run a full downstream analysis of
+HMMRATAC on the output data from the `AnVILHMMRATAC` workflow. The output data
+will be retrieved and utilized in functions from the `r Biocpkg("ChIPseeker")`
+package.
+
+# Installation
+
+```{r setup}
+library(AnVILHMMRATAC)
+```
+
+```{r install}
+pkgs = c("Bioconductor/AnVIL", "ChIPseeker", "org.Hs.eg.db")
+BiocManager::install(pkgs)
+
+suppressPackageStartupMessages({
+    library(AnVIL)
+    library(ChIPseeker)
+    library(org.Hs.eg.db)
+})
+```
+
+# Obtaining the data
+
+The files that are needed for the `ChIPseeker` analysis are the `.gappedPeak`
+files for each sample. We localize those files for the anlysis.
+
+```{r paths}
+avworkspace("bioconductor-rpci-anvil/HMMRATAC")
+gP_paths <- avworkflow_jobs() %>%
+    head(1) %>%
+    avworkflow_files() %>%
+    filter(endsWith(.data$file, ".gappedPeak")) %>%
+    pull(path)
+
+```
+
+`avworkflow_jobs()` will locate the list of jobs run on the AnVIL workspace.
+The last job is grabbed using `head(1)`, then the files associated with that
+job are listed using `avworkflow_files()`. We know that our sample files all
+have the ending `.gappedPeak` so we use `filter(endsWith(.data$file,
+".gappedPeak"))` to filter out the files that end with ".gappedPeak". Then we
+use `pull(path)` to pull out the paths where the output data was saved on the
+Google bucket for this workspace.
+
+With these paths, we then localize them to our local machine to use in the
+following analysis.
+
+```{r paths}
+localize(gP_paths, getwd(), dry = FALSE)
+
+files_path <- paste0(getwd(), "/SRR8912%.filteredPeaks.gappedPeak")
+files <- sprintf(files_path, 69:74)
+```
+
+# Downstream analysis
+
+Now we will utilize the `ChIPseeker` package to perform statistical testing of
+significant overlap among ChIP seq data sets. It incorporates open access
+database GEO to allow users to compare their datasets to those available on
+GEO.
+
+```{r chipseeker}
+peak <- readPeakFile(file_path)
+
+## display peak locations across entire genome
+covplot(peak, weightCol = "weights")
+
+## perform peak annotation
+peakAnno <- annotatePeak(files[[4]],
+    tssRegion = c(-3000, 3000),
+    TxDb = txdb,
+    annoDb = "org.Hs.eg.db")
+
+plotAnnoPie(peakAnno)
+
+upsetplot(peakAnno, vennpie = TRUE)
+
+plotDistToTSS(peakAnno,
+    title = "Distribution of transcription factor-binding loci relative to
+TSS")
+
+# Session Information
+
+```{r}
+sessionInfo()
+```

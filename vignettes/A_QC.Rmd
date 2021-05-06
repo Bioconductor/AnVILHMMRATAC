@@ -1,0 +1,126 @@
+---
+title: "Quality Control of AnVILHMMRATAC Data"
+author:
+- name: Kayla Interdonato
+  affiliation: Roswell Park Comprehensive Cancer Center, Buffalo, NY
+date: "`r Sys.Date()`"
+output:
+    BiocStyle::html_document:
+        toc: true
+        toc_float: true
+vignette: >
+  %\VignetteIndexEntry{A_QC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+The goal of the `AnVILHMMRATAC` package is to provide users all the tools to
+perform a `HMMRATAC` analysis utilizing AnVIL. This package contains all the
+files (except for raw reference genome and chromosome information) needed to
+complete the analysis.
+
+This vignette will demonstrate to the user how to perform a quality check of
+the alignment using the `r Biocpkg("ATACseqQC")` package. The bam file will be
+obtained from the Google bucket of this project.
+
+# Installation
+
+The following code will install the latest version of the `AnVILHMMRATAC`
+package from Bioconductor.
+
+```{r install, eval = FALSE}
+if(!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("AnVILHMMRATAC")
+```
+
+Then to load `AnVILHMMRATAC`:
+
+```{r load, message = FALSE}
+library(AnVILHMMRATAC)
+```
+
+We will also need the `AnVIL` package for certain functionality so we will
+install and load it now.
+
+```{r anvil}
+pkgs = c("Bioconductor/AnVIL", "Rsamtools", "ATACseqQC") 
+BiocManager::install(pkgs)
+
+suppressPackageStartupMessages({
+    library(AnVIL)
+    library(Rsamtools)
+    library(ATACseqQC)
+})
+```
+
+# Locate the files
+
+We will be performing QC on the bam file produced from the AnVILHMMRATAC
+workflow. In order to run this QC we must first locate the bam file and create
+a sorted bam file.
+
+```{r paths}
+avworkspace("bioconductor-rpci-anvil/HMMRATAC")
+bam_path <- paste0(avbucket(), "/data/bam_file.bam")
+
+AnVIL::localize(bam_path, getwd(), dry = FALSE)
+```
+
+We will use the `r Biocpkg("Rsamtools")` package to create a sorted bam file
+that will be used in the `ATACseqQC` function. 
+
+```{r sorted_bam}
+## generate sorted bam file and save to a temporary location
+bam <- sortBam(file = "bam_file.bam", destination = tempfile())
+```
+
+# Perform QC
+
+Next we will use the `ATACseqQC` package to assess the quality of the
+alignment.
+
+```{r qc}
+estimateLibComplexity(readDupFreq(bam))
+fragSize <- fragSizeDist(bam, "Frag Sizes")
+```
+
+We can also perform footprint identification with `ATACseqQC`.
+
+```{r footprint}
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(MotifDb)
+CTCF <- query(MotifDb, c("CTCF"))
+CTCF <- as.list(CTCF)
+seqlev <- "chr1"
+
+sigs <- factorFootprints(bam,
+    pfm = CTCF[[1]],
+    genome = Hsapiens,
+    min.score = "90%",
+    seqlev = seqlev,
+    upstream = 100,
+    downstream = 100)
+
+featureAlignedHeatmap(sigs$signal,
+    feature.gr = reCenterPeaks(sigs$bindingSites,
+        width = 200+width(sigs$bindingSites[1])),
+    annoMcols = "score",
+    sortBy = "score",
+    n.tile = ncol(sigs$signal[[1]]))
+```                                                 
+
+# Session Information
+
+```{r}
+sessionInfo()
+```
