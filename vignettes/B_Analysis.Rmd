@@ -71,7 +71,7 @@ Google bucket for this workspace.
 With these paths, we then localize them to our local machine to use in the
 following analysis.
 
-```{r paths}
+```{r localize}
 localize(gP_paths, getwd(), dry = FALSE)
 
 files_path <- paste0(getwd(), "/SRR8912%.filteredPeaks.gappedPeak")
