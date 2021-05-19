@@ -41,12 +41,12 @@ task hmmratac_run {
         set -e -o pipefail
         bwa mem -t 6 ${bwa_ref} ${fastq1} ${fastq2} | \
         samtools view -bS -t ${chromInfo} -o bam_file.bam - 
-        samtools sort bam_file.bam -o ATACseq.sorted.bam
-        samtools index -@ 6 ATACseq.sorted.bam ATACseq.sorted.bam.bai
-        samtools view -H ATACseq.sorted.bam | \
+        samtools sort bam_file.bam -o ${out}.sorted.bam
+        samtools index -@ 6 ${out}.sorted.bam ${out}.sorted.bam.bai
+        samtools view -H ${out}.sorted.bam | \
         awk -F'[\t:]' '$1 == "@SQ" {print $3"\t"$5}' > genome.info
         java -jar /HMMRATAC_V1.2.10_exe.jar --window 250000 \
-        -b ATACseq.sorted.bam -i ATACseq.sorted.bam.bai -g genome.info \
+        -b ${out}.sorted.bam -i ${out}.sorted.bam.bai -g genome.info \
         -o ${out}
         awk -v OFS="\t" '$13 >= 10 {print}' ${out}_peaks.gappedPeak > ${out}.filteredPeaks.gappedPeak
     >>>
@@ -60,6 +60,9 @@ task hmmratac_run {
 
     output {
         File filtered_gappedPeak = "${out}.filteredPeaks.gappedPeak"
+        File sorted_bam = "${out}.sorted.bam"
+        File sorted_bam_bai = "${out}.sorted.bam.bai"
+        File summits_bed = "${out}_summits.bed"
     }
 }
 
