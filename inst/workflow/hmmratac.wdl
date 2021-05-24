@@ -45,7 +45,7 @@ task hmmratac_run {
         samtools index -@ 6 ${out}.sorted.bam ${out}.sorted.bam.bai
         samtools view -H ${out}.sorted.bam | \
         awk -F'[\t:]' '$1 == "@SQ" {print $3"\t"$5}' > genome.info
-        java -jar /HMMRATAC_V1.2.10_exe.jar --window 250000 \
+        java -jar /HMMRATAC_V1.2.10_exe.jar --window 25000 \
         -b ${out}.sorted.bam -i ${out}.sorted.bam.bai -g genome.info \
         -o ${out}
         awk -v OFS="\t" '$13 >= 10 {print}' ${out}_peaks.gappedPeak > ${out}.filteredPeaks.gappedPeak
@@ -53,7 +53,7 @@ task hmmratac_run {
 
     runtime {
         docker: "mtmorgan/hmmratac:latest"
-        memory: "36G"
+        memory: "40G"
         cpu: "6"
         disks: "local-disk 100 SSD"
     }
