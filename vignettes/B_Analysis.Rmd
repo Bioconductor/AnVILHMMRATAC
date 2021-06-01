@@ -75,7 +75,7 @@ following analysis.
 localize(gP_paths, getwd(), dry = FALSE)
 
 files_path <- paste0(getwd(), "/SRR8912%.filteredPeaks.gappedPeak")
-files <- sprintf(files_path, 69:74)
+files <- sprintf(files_path, 69:80)
 ```
 
 # Downstream analysis
