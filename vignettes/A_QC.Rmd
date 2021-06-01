@@ -29,8 +29,8 @@ files (except for raw reference genome and chromosome information) needed to
 complete the analysis.
 
 This vignette will demonstrate to the user how to perform a quality check of
-the alignment using the `r Biocpkg("ATACseqQC")` package. The bam file will be
-obtained from the Google bucket of this project.
+the alignment using the `r Biocpkg("ATACseqQC")` package. The bam files for each
+file will be obtained from the Google bucket of this project.
 
 # Installation
 
@@ -65,23 +65,28 @@ suppressPackageStartupMessages({
 
 # Locate the files
 
-We will be performing QC on the bam file produced from the AnVILHMMRATAC
-workflow. In order to run this QC we must first locate the bam file and create
-a sorted bam file.
+We will be performing QC on each of the bam files produced from the 
+AnVILHMMRATAC workflow. In order to run this QC we must first locate the bam 
+files. We have saved the sorted bam files from the workflow, so sorting is not
+needed. If your bam files have not been sorted, we suggest doing this first.
+
+As part of the workflow, we saved the default outputs. This means that the paths
+to the outputs were saved in the corresponding entry in the 'participant_set'
+table. We will obtain the paths from here.
 
 ```{r paths}
 avworkspace("bioconductor-rpci-anvil/HMMRATAC")
-bam_path <- paste0(avbucket(), "/data/bam_file.bam")
+sorted_bams <- unlist(avtable("participant_set") %>%
+    tail(1) %>%
+    pull("sorted_bam.items")
+    )
 
-AnVIL::localize(bam_path, getwd(), dry = FALSE)
-```
+## I want to localize but the function looks for a directory to localize, 
+## not individual files
+lapply(sorted_bams, function(x) AnVIL::localize(x, getwd(), dry = FALSE))
 
-We will use the `r Biocpkg("Rsamtools")` package to create a sorted bam file
-that will be used in the `ATACseqQC` function. 
-
-```{r sorted_bam}
-## generate sorted bam file and save to a temporary location
-bam <- sortBam(file = "bam_file.bam", destination = tempfile())
+## will copy for now, until I can figure out localize
+AnVIL::gsutil_cp(sorted_bams, getwd())
 ```
 
 # Perform QC
@@ -90,8 +95,12 @@ Next we will use the `ATACseqQC` package to assess the quality of the
 alignment.
 
 ```{r qc}
-estimateLibComplexity(readDupFreq(bam))
-fragSize <- fragSizeDist(bam, "Frag Sizes")
+fls <- list.files(".", pattern = "*.bam$")
+lapply(fls, function(x) {
+    estimateLibComplexity(readsDupFreq(x))
+    fragSize[x] <- fragSizeDist(x, "Frag Sizes")
+}
+fragSize
 ```
 
 We can also perform footprint identification with `ATACseqQC`.
@@ -103,13 +112,15 @@ CTCF <- query(MotifDb, c("CTCF"))
 CTCF <- as.list(CTCF)
 seqlev <- "chr1"
 
-sigs <- factorFootprints(bam,
-    pfm = CTCF[[1]],
-    genome = Hsapiens,
-    min.score = "90%",
-    seqlev = seqlev,
-    upstream = 100,
-    downstream = 100)
+lapply(fls, function(x) {
+    sigs[x] <- factorFootprints(x,
+        pfm = CTCF[[1]],
+        genome = Hsapiens,
+        min.score = "90%",
+        seqlev = seqlev,
+        upstream = 100,
+        downstream = 100)
+})
 
 featureAlignedHeatmap(sigs$signal,
     feature.gr = reCenterPeaks(sigs$bindingSites,
