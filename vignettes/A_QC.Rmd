@@ -53,13 +53,16 @@ We will also need the `AnVIL` package for certain functionality so we will
 install and load it now.
 
 ```{r anvil}
-pkgs = c("Bioconductor/AnVIL", "Rsamtools", "ATACseqQC") 
+pkgs = c("Bioconductor/AnVIL", "Rsamtools", "ATACseqQC",
+    "BSgenome.Hsapiens.UCSC.hg19", "MotifDb") 
 BiocManager::install(pkgs)
 
 suppressPackageStartupMessages({
     library(AnVIL)
     library(Rsamtools)
     library(ATACseqQC)
+    library(BSgenome.Hsapiens.UCSC.hg19)
+    library(MotifDb)
 })
 ```
 
@@ -74,53 +77,55 @@ As part of the workflow, we saved the default outputs. This means that the paths
 to the outputs were saved in the corresponding entry in the 'participant_set'
 table. We will obtain the paths from here.
 
-```{r paths}
+```{r participant_set}
 avworkspace("bioconductor-rpci-anvil/HMMRATAC")
-sorted_bams <- unlist(avtable("participant_set") %>%
-    tail(1) %>%
-    pull("sorted_bam.items")
-    )
+part_set <- avtable("participant_set") %>% 
+    filter(participant_set_id == "AnVILHMMRATAC_2021-05-26T15-32-59") %>%
+    tidyr::unnest()
+```
 
-## I want to localize but the function looks for a directory to localize, 
-## not individual files
-lapply(sorted_bams, function(x) AnVIL::localize(x, getwd(), dry = FALSE))
+Now that we have the participant set table, with the locations for the outputs,
+we can pull out the needed files. For the first QC step we will need to copy the
+sorted bam and sorted bam bai files copied to the working directory.
 
-## will copy for now, until I can figure out localize
+```{r copy_files}
+sorted_bams <- part_set %>% pull("sorted_bam.items")
 AnVIL::gsutil_cp(sorted_bams, getwd())
+
+sorted_bam_bais <- part_set %>% pull("sorted_bam_bai.items")
+AnVIL::gsutil_cp(sorted_bam_bais, getwd())
 ```
 
 # Perform QC
 
 Next we will use the `ATACseqQC` package to assess the quality of the
-alignment.
+alignment. We demonstrate this step on one sample, but will be applicable to any
+of the samples.
 
-```{r qc}
+```{r libraryComplexity}
 fls <- list.files(".", pattern = "*.bam$")
-lapply(fls, function(x) {
-    estimateLibComplexity(readsDupFreq(x))
-    fragSize[x] <- fragSizeDist(x, "Frag Sizes")
-}
-fragSize
+
+estimateLibComplexity(readsDupFreq(fls[1])) ## this took about 9 min. to run
+```
+
+```{r fragSizeDist}
+fragSize <- fragSizeDist(fls[1], "Frag Sizes")
 ```
 
 We can also perform footprint identification with `ATACseqQC`.
 
-```{r footprint}
-library(BSgenome.Hsapiens.UCSC.hg19)
-library(MotifDb)
+```{r footprintID}
 CTCF <- query(MotifDb, c("CTCF"))
 CTCF <- as.list(CTCF)
 seqlev <- "chr1"
 
-lapply(fls, function(x) {
-    sigs[x] <- factorFootprints(x,
-        pfm = CTCF[[1]],
-        genome = Hsapiens,
-        min.score = "90%",
-        seqlev = seqlev,
-        upstream = 100,
-        downstream = 100)
-})
+sigs <- factorFootprints(fls[1],
+    pfm = CTCF[[1]],
+    genome = Hsapiens, ## issue with genome at the moment...
+    min.score = "90%",
+    seqlev = seqlev,
+    upstream = 100,
+    downstream = 100)
 
 featureAlignedHeatmap(sigs$signal,
     feature.gr = reCenterPeaks(sigs$bindingSites,
