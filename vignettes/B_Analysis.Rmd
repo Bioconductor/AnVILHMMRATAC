@@ -25,8 +25,8 @@ knitr::opts_chunk$set(
 
 This vignette will walk a user through how to run a full downstream analysis of
 HMMRATAC on the output data from the `AnVILHMMRATAC` workflow. The output data
-will be retrieved and utilized in functions from the `r Biocpkg("ChIPseeker")`
-package.
+will be retrieved and utilized in functions from the `r Biocpkg("DiffBind")`,
+the `r Biocpkg("rGREAT")`, and the `r Biocpkg("ChIPseeker")` packages. 
 
 # Installation
 
@@ -35,64 +35,101 @@ library(AnVILHMMRATAC)
 ```
 
 ```{r install}
-pkgs = c("Bioconductor/AnVIL", "ChIPseeker", "org.Hs.eg.db")
+pkgs = c("Bioconductor/AnVIL", "DiffBind", "rGREAT", "ChIPseeker", i
+    "TxDb.Hsapiens.UCSC.hg19.knownGene", "org.Hs.eg.db")
 BiocManager::install(pkgs)
 
 suppressPackageStartupMessages({
     library(AnVIL)
+    library(DiffBind)
+    library(rGREAT)
     library(ChIPseeker)
+    library(TxDb.Hsapiens.UCSC.hg19.knownGene)
     library(org.Hs.eg.db)
 })
 ```
 
 # Obtaining the data
 
-The files that are needed for the `ChIPseeker` analysis are the `.gappedPeak`
-files for each sample. We localize those files for the anlysis.
+The location of the files needed for the following analyses can be obtained from
+the 'participant_set' table. We will create a table of these locations so that
+we can copy them to the workspace when needed.
 
-```{r paths}
+```{r part_set}
 avworkspace("bioconductor-rpci-anvil/HMMRATAC")
-gP_paths <- avworkflow_jobs() %>%
-    head(1) %>%
-    avworkflow_files() %>%
-    filter(endsWith(.data$file, ".gappedPeak")) %>%
-    pull(path)
+part_set <- avtable("participant_set") %>%
+    filter(participant_set_id == "AnVILHMMRATAC_2021-05-26T15-32-59") %>%
+    tidyr::unnest()
+```
+
+# DiffBind
+
+The DiffBind package specializes in identifying sites that are differentially
+bound between two sample groups. It also contains functionality for processing
+peak sets, counting sequencing reads overlapping intervals in peak sets, and
+identifying statistically significant differentially bound sites based on
+evidence of binding affinity.
+
+Here, we will use metadata from the 'participant' table since this table
+discribes the treatments from the study. Then we will perform count, contrast,
+analyze and report from DiffBind.
+
+```{r samplesheet}
+part_tbl <- avtable("participant")
+sub_tbl <- as.data.frame(part_tbl[7:12, -3])
+```
+
+```{r diffbind}
+dba <- dba(sapleSheet = sub_tbl)
+count <- dba.count(dba, summits=500)
+contrast <- dba.contrast(count, categorizes = DBA_CONDITION)
+analyze <- dba.analyze(contrast)
+bed <- dba.report(analyze)
 
 ```
 
-`avworkflow_jobs()` will locate the list of jobs run on the AnVIL workspace.
-The last job is grabbed using `head(1)`, then the files associated with that
-job are listed using `avworkflow_files()`. We know that our sample files all
-have the ending `.gappedPeak` so we use `filter(endsWith(.data$file,
-".gappedPeak"))` to filter out the files that end with ".gappedPeak". Then we
-use `pull(path)` to pull out the paths where the output data was saved on the
-Google bucket for this workspace.
+# rGREAT
 
-With these paths, we then localize them to our local machine to use in the
-following analysis.
+`rGREAT` is a package that can read peak files and infer which pathways are
+enriched using functional enrichemnt analysis.
 
-```{r localize}
-localize(gP_paths, getwd(), dry = FALSE)
-
-files_path <- paste0(getwd(), "/SRR8912%.filteredPeaks.gappedPeak")
-files <- sprintf(files_path, 69:80)
+```{r rGREAT}
+job <- submitGreatJob(bed)
+tb <- getEnrichmentTables(job)
+look <- tb[[1]]
+res <- look[look$Hyper_Adjp_BH < 0.05,]
 ```
 
-# Downstream analysis
+# ChIPseeker
 
-Now we will utilize the `ChIPseeker` package to perform statistical testing of
-significant overlap among ChIP seq data sets. It incorporates open access
-database GEO to allow users to compare their datasets to those available on
-GEO.
+The ChIPseeker package is meant to perform statistical testing of significant
+overlap among ChIP seq datasets. It also incorporates open access database GEO
+to allow users to compare their dataset to those available on GEO.
+
+First we will need to copy over the gappedPeak files from the HMMRATAC output to
+our current working directory.
+
+```{r gpCopy}
+gP_paths <- part_set %>% pull("filtered_gappedPeak.items")
+AnVIL::gsutil_cp(gP_paths, getwd())
+```
 
 ```{r chipseeker}
-peak <- readPeakFile(file_path)
+fls <- list.files(".", pattern = "*.filteredPeaks.gappedPeak$")
+peak <- readPeakFile(fls[8])
+```
 
-## display peak locations across entire genome
+Display peak locations across entire genome.
+
+```{r covplot}
 covplot(peak, weightCol = "weights")
+```
 
-## perform peak annotation
-peakAnno <- annotatePeak(files[[4]],
+Perform peak annotation.
+
+```{r peakAnnotation}
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+peakAnno <- annotatePeak(fls[8],
     tssRegion = c(-3000, 3000),
     TxDb = txdb,
     annoDb = "org.Hs.eg.db")
@@ -104,6 +141,7 @@ upsetplot(peakAnno, vennpie = TRUE)
 plotDistToTSS(peakAnno,
     title = "Distribution of transcription factor-binding loci relative to
 TSS")
+```
 
 # Session Information
 
