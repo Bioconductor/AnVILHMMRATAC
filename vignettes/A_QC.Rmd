@@ -54,14 +54,14 @@ install and load it now.
 
 ```{r anvil}
 pkgs = c("Bioconductor/AnVIL", "Rsamtools", "ATACseqQC",
-    "BSgenome.Hsapiens.UCSC.hg19", "MotifDb") 
+    "BSgenome.Hsapiens.NCBI.GRCh38", "MotifDb") 
 BiocManager::install(pkgs)
 
 suppressPackageStartupMessages({
     library(AnVIL)
     library(Rsamtools)
     library(ATACseqQC)
-    library(BSgenome.Hsapiens.UCSC.hg19)
+    library(BSgenome.Hsapiens.NCBI.GRCh38)
     library(MotifDb)
 })
 ```
@@ -80,7 +80,7 @@ table. We will obtain the paths from here.
 ```{r participant_set}
 avworkspace("bioconductor-rpci-anvil/HMMRATAC")
 part_set <- avtable("participant_set") %>% 
-    filter(participant_set_id == "AnVILHMMRATAC_2021-05-26T15-32-59") %>%
+    filter(name == "AnVILHMMRATAC_2021-05-26T15-32-59") %>%
     tidyr::unnest()
 ```
 
@@ -117,11 +117,11 @@ We can also perform footprint identification with `ATACseqQC`.
 ```{r footprintID}
 CTCF <- query(MotifDb, c("CTCF"))
 CTCF <- as.list(CTCF)
-seqlev <- "chr1"
+seqlev <- "1"
 
 sigs <- factorFootprints(fls[1],
     pfm = CTCF[[1]],
-    genome = Hsapiens, ## issue with genome at the moment...
+    genome = Hsapiens,
     min.score = "90%",
     seqlev = seqlev,
     upstream = 100,

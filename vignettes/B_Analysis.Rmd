@@ -35,7 +35,7 @@ library(AnVILHMMRATAC)
 ```
 
 ```{r install}
-pkgs = c("Bioconductor/AnVIL", "DiffBind", "rGREAT", "ChIPseeker", i
+pkgs = c("Bioconductor/AnVIL", "DiffBind", "rGREAT", "ChIPseeker", 
     "TxDb.Hsapiens.UCSC.hg19.knownGene", "org.Hs.eg.db")
 BiocManager::install(pkgs)
 
@@ -58,9 +58,18 @@ we can copy them to the workspace when needed.
 ```{r part_set}
 avworkspace("bioconductor-rpci-anvil/HMMRATAC")
 part_set <- avtable("participant_set") %>%
-    filter(participant_set_id == "AnVILHMMRATAC_2021-05-26T15-32-59") %>%
+    filter(name == "AnVILHMMRATAC_2021-05-26T15-32-59") %>%
     tidyr::unnest()
 ```
+
+The sorted bam files should already be copied to the current working directory
+from the previous vignette. We will also need the summit bed files copied to
+the working directory for the DiffBind analysis.
+
+```{r summit_beds}
+summit_beds <- part_set %>% pull("summits_bed.items")
+AnVIL::gsutil_cp(summit_beds, getwd())
+``` 
 
 # DiffBind
 
@@ -76,16 +85,24 @@ analyze and report from DiffBind.
 
 ```{r samplesheet}
 part_tbl <- avtable("participant")
-sub_tbl <- as.data.frame(part_tbl[7:12, -3])
+sub_tbl <- as.data.frame(part_tbl[7:12, -c(2:4])
+colnames(sub_tbl) <- c("SampleID", "Tissue", "Replicate", "Condition")
+
+sorted_bams <- file.path(getwd(), "SRR8912%s.sorted.bam")
+sub_tbl$bamReads <- sprintf(sorted_bams, 75:80)
+
+peaks <- file.path(getwd(), "SRR8912%s_summits.bed")
+sub_tbl$Peaks <- sprintf(peaks, 75:80)
+
+sub_tbl$PeakCaller <- rep("bed", 6)
 ```
 
 ```{r diffbind}
-dba <- dba(sapleSheet = sub_tbl)
+dba <- dba(sampleSheet = sub_tbl)
 count <- dba.count(dba, summits=500)
 contrast <- dba.contrast(count, categorizes = DBA_CONDITION)
 analyze <- dba.analyze(contrast)
 bed <- dba.report(analyze)
-
 ```
 
 # rGREAT
