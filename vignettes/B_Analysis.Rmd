@@ -100,7 +100,7 @@ sub_tbl$PeakCaller <- rep("bed", 6)
 ```{r diffbind}
 dba <- dba(sampleSheet = sub_tbl)
 count <- dba.count(dba, bParallel = FALSE)
-contrast <- dba.contrast(count, categorizes = DBA_CONDITION)
+contrast <- dba.contrast(count, contrast = c("Condition", "Day1", "Day3"))
 analyze <- dba.analyze(contrast)
 bed <- dba.report(analyze)
 ```
@@ -111,6 +111,8 @@ bed <- dba.report(analyze)
 enriched using functional enrichemnt analysis.
 
 ```{r rGREAT}
+## probably won't work because chromosome names in bed
+## don't have 'chr' prefix
 job <- submitGreatJob(bed)
 tb <- getEnrichmentTables(job)
 look <- tb[[1]]
@@ -139,7 +141,7 @@ peak <- readPeakFile(fls[8])
 Display peak locations across entire genome.
 
 ```{r covplot}
-covplot(peak, weightCol = "weights")
+covplot(peak, weightCol = "X33.0") ## I'm not sure if this is the correct column
 ```
 
 Perform peak annotation.
