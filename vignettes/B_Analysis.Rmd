@@ -85,7 +85,7 @@ analyze and report from DiffBind.
 
 ```{r samplesheet}
 part_tbl <- avtable("participant")
-sub_tbl <- as.data.frame(part_tbl[7:12, -c(2:4])
+sub_tbl <- as.data.frame(part_tbl[7:12, -c(2:4)])
 colnames(sub_tbl) <- c("SampleID", "Tissue", "Replicate", "Condition")
 
 sorted_bams <- file.path(getwd(), "SRR8912%s.sorted.bam")
@@ -99,7 +99,7 @@ sub_tbl$PeakCaller <- rep("bed", 6)
 
 ```{r diffbind}
 dba <- dba(sampleSheet = sub_tbl)
-count <- dba.count(dba, summits=500)
+count <- dba.count(dba, bParallel = FALSE)
 contrast <- dba.contrast(count, categorizes = DBA_CONDITION)
 analyze <- dba.analyze(contrast)
 bed <- dba.report(analyze)
