@@ -111,12 +111,14 @@ bed <- dba.report(analyze)
 enriched using functional enrichemnt analysis.
 
 ```{r rGREAT}
-## probably won't work because chromosome names in bed
-## don't have 'chr' prefix
-job <- submitGreatJob(bed)
+genome(bed) <- "GRCh38"
+seqlevelsStyle(bed) <- "UCSC"
+bed1 <- GenomeInfoDb::keepStandardChromosomes(bed, pruning.mode = "coarse")
+job <- submitGreatJob(bed1)
 tb <- getEnrichmentTables(job)
 look <- tb[[1]]
-res <- look[look$Hyper_Adjp_BH < 0.05,]
+tbl <- as_tibble(look)
+tbl %>% arrange(Bionom_Raw_PValue) %>% dplyr::select(ID, name, Binom_Raw_PValue)
 ```
 
 # ChIPseeker
@@ -141,20 +143,17 @@ peak <- readPeakFile(fls[8])
 Display peak locations across entire genome.
 
 ```{r covplot}
-covplot(peak, weightCol = "X33.0") ## I'm not sure if this is the correct column
-# covplot(peak) might be enough
+covplot(peak)
 ```
 
 Perform peak annotation.
 
 ```{r peakAnnotation}
-txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
-newnames <- paste0(c("1","2","3","4", "5","6","7", "8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y","MT"))
-names(newnames) <- paste0(c("NC_000001.11","NC_000002.12","NC_000003.12","NC_000004.12", "NC_000005.10","NC_000006.12","NC_000007.14", "NC_000008.11","NC_000009.12","NC_000010.11","NC_000011.10","NC_000012.12","NC_000013.11","NC_000014.9","NC_000015.10","NC_000016.10","NC_000017.11","NC_000018.10","NC_000019.10","NC_000020.11","NC_000021.9","NC_000022.11","NC_000023.11","NC_000024.10","NC_012920.1"))
-peaks_with_new_seq_level <- renameSeqlevels(peak, newnames)
-peak2 <- addchr(peaks_with_new_seq_level)
+txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
 
-peakAnno <- annotatePeak(peak2,
+genome(peak) <- "GRCh38"
+seqlevelsStyle(peak) <- "UCSC"
+peakAnno <- annotatePeak(peak,
     tssRegion = c(-3000, 3000),
     TxDb = txdb,
     annoDb = "org.Hs.eg.db")
@@ -162,11 +161,6 @@ peakAnno <- annotatePeak(peak2,
 plotAnnoPie(peakAnno)
 
 upsetplot(peakAnno, vennpie = TRUE)
-
-
-plotDistToTSS(peakAnno,
-    title = "Distribution of transcription factor-binding loci relative to
-TSS") ## having some issues with this one...
 ```
 
 # Session Information
