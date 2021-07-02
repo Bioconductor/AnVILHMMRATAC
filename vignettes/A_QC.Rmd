@@ -34,23 +34,8 @@ file will be obtained from the Google bucket of this project.
 
 # Installation
 
-The following code will install the latest version of the `AnVILHMMRATAC`
-package from Bioconductor.
-
-```{r install, eval = FALSE}
-if(!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install("AnVILHMMRATAC")
-```
-
-Then to load `AnVILHMMRATAC`:
-
-```{r load, message = FALSE}
-library(AnVILHMMRATAC)
-```
-
-We will also need the `AnVIL` package for certain functionality so we will
-install and load it now.
+We will need the `AnVIL` package for certain functionality so we will install 
+and load it now with other packages for this vignette.
 
 ```{r anvil}
 pkgs = c("Bioconductor/AnVIL", "Rsamtools", "ATACseqQC",
@@ -80,7 +65,7 @@ table. We will obtain the paths from here.
 ```{r participant_set}
 avworkspace("bioconductor-rpci-anvil/HMMRATAC")
 part_set <- avtable("participant_set") %>% 
-    filter(name == "AnVILHMMRATAC_2021-05-26T15-32-59") %>%
+    filter(participant_set_id == "AnVILHMMRATAC_2021-05-26T15-32-59") %>%
     tidyr::unnest()
 ```
 
@@ -94,6 +79,8 @@ AnVIL::gsutil_cp(sorted_bams, getwd())
 
 sorted_bam_bais <- part_set %>% pull("sorted_bam_bai.items")
 AnVIL::gsutil_cp(sorted_bam_bais, getwd())
+
+fls <- list.files(".", pattern = "*.bam$")
 ```
 
 # Perform QC
@@ -103,8 +90,6 @@ alignment. We demonstrate this step on one sample, but will be applicable to any
 of the samples.
 
 ```{r libraryComplexity}
-fls <- list.files(".", pattern = "*.bam$")
-
 estimateLibComplexity(readsDupFreq(fls[1])) ## this took about 9 min. to run
 ```
 

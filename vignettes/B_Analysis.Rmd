@@ -30,10 +30,6 @@ the `r Biocpkg("rGREAT")`, and the `r Biocpkg("ChIPseeker")` packages.
 
 # Installation
 
-```{r setup}
-library(AnVILHMMRATAC)
-```
-
 ```{r install}
 pkgs = c("Bioconductor/AnVIL", "DiffBind", "rGREAT", "ChIPseeker", 
     "TxDb.Hsapiens.UCSC.hg19.knownGene", "org.Hs.eg.db")
@@ -58,7 +54,7 @@ we can copy them to the workspace when needed.
 ```{r part_set}
 avworkspace("bioconductor-rpci-anvil/HMMRATAC")
 part_set <- avtable("participant_set") %>%
-    filter(name == "AnVILHMMRATAC_2021-05-26T15-32-59") %>%
+    filter(participant_set_id == "AnVILHMMRATAC_2021-05-26T15-32-59") %>%
     tidyr::unnest()
 ```
 
